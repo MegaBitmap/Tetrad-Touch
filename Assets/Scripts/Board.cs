@@ -9,7 +9,15 @@ public class Board : MonoBehaviour
     public TetrominoData[] tetrominoes;
     public Vector2Int boardSize = new Vector2Int(10, 20);
     public Vector3Int spawnPosition = new Vector3Int(-1, 8, 0);
-
+    public Vector3Int iPosition = new Vector3Int(-4, 10, 0);
+    public Vector3Int nextPosition = new Vector3Int(-4, 11, 0);
+    public Vector3Int[] cells { get; private set; }
+    public TetrominoData data;
+    private int lineClears;
+    private int random;
+    private bool pieceLoaded = false;
+    Score score;
+    
     public RectInt Bounds
     {
         get
@@ -21,6 +29,7 @@ public class Board : MonoBehaviour
 
     private void Awake()
     {
+        score = GameObject.FindObjectOfType<Score>();
         tilemap = GetComponentInChildren<Tilemap>();
         activePiece = GetComponentInChildren<Piece>();
 
@@ -30,15 +39,35 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void Start()
+    public void Start()
     {
+        random = Random.Range(0, tetrominoes.Length);
+        score.ResetScore();
+        lineClears = 0;
         SpawnPiece();
     }
 
     public void SpawnPiece()
     {
-        int random = Random.Range(0, tetrominoes.Length);
-        TetrominoData data = tetrominoes[random];
+        if (pieceLoaded)
+        {
+            if (random == 0)
+            {
+                for (int i = 0; i < data.cells.Length; i++)
+                {
+                    Vector3Int tilePosition = (Vector3Int)data.cells[i] + iPosition;
+                    tilemap.SetTile(tilePosition, null);
+                }
+            }
+            else {
+                for (int i = 0; i < data.cells.Length; i++)
+                {
+                    Vector3Int tilePosition = (Vector3Int)data.cells[i] + nextPosition;
+                    tilemap.SetTile(tilePosition, null);
+                }
+            }
+        }
+        data = tetrominoes[random];
 
         activePiece.Initialize(this, spawnPosition, data);
 
@@ -50,13 +79,42 @@ public class Board : MonoBehaviour
         {
             GameOver();
         }
+
+        random = Random.Range(0, tetrominoes.Length);
+        data = tetrominoes[random];
+        pieceLoaded = true;
+
+        if (cells == null)
+        {
+            cells = new Vector3Int[data.cells.Length];
+        }
+        for (int i = 0; i < data.cells.Length; i++)
+        {
+            cells[i] = (Vector3Int)data.cells[i];
+        }
+        if (random == 0)
+        {
+            for (int i = 0; i < data.cells.Length; i++)
+            {
+                Vector3Int tilePosition = (Vector3Int)data.cells[i] + iPosition;
+                tilemap.SetTile(tilePosition, data.tile);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < data.cells.Length; i++)
+            {
+                Vector3Int tilePosition = (Vector3Int)data.cells[i] + nextPosition;
+                tilemap.SetTile(tilePosition, data.tile);
+            }
+        }
     }
 
     public void GameOver()
     {
         tilemap.ClearAllTiles();
-
-        // Do anything else you want on game over here..
+        score.ResetScore();
+        lineClears = 0;
     }
 
     public void Set(Piece piece)
@@ -143,6 +201,16 @@ public class Board : MonoBehaviour
 
     public void LineClear(int row)
     {
+        score.AddScore(1000);
+        score.AddMultiplier(1);
+        lineClears++;
+
+        if (lineClears > 10)
+        {
+            score.AddLevel(1);
+            lineClears = 0;
+        }
+
         RectInt bounds = Bounds;
 
         // Clear all tiles in the row
@@ -168,4 +236,58 @@ public class Board : MonoBehaviour
         }
     }
 
+    public void Save()
+    {
+        Clear(activePiece);
+        score.SaveScore();
+
+        RectInt bounds = Bounds;
+        for (int col = bounds.xMin; col < bounds.xMax; col++)
+        {
+            for (int row = bounds.yMin; row < bounds.yMax; row++)
+            {
+                Vector3Int position = new Vector3Int(col, row, 0);
+                TileBase temp = tilemap.GetTile(position);
+                if (tilemap.HasTile(position))
+                {
+                    PlayerPrefs.SetInt(col + "_pos_" + row, 1);
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (temp == tetrominoes[i].tile)
+                        {
+                            PlayerPrefs.SetInt(col + "_color_" + row, i);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    PlayerPrefs.SetInt(col + "_pos_" + row, 0);
+                }
+            }
+        }
+    }
+
+    public void Load()
+    {
+        score.LoadScore();
+
+        RectInt bounds = Bounds;
+        for (int col = bounds.xMin; col < bounds.xMax; col++)
+        {
+            for (int row = bounds.yMin; row < bounds.yMax; row++)
+            {
+                Vector3Int position = new Vector3Int(col, row, 0);
+                int tempTile = PlayerPrefs.GetInt(col + "_color_" + row);
+                if (PlayerPrefs.GetInt(col + "_pos_" + row) == 1)
+                {
+                    tilemap.SetTile(position, tetrominoes[tempTile].tile);
+                }
+                else
+                {
+                    tilemap.SetTile(position, null);
+                }
+            }
+        }
+    }
 }

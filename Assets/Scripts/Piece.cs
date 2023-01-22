@@ -8,7 +8,7 @@ public class Piece : MonoBehaviour
     public Vector3Int position { get; private set; }
     public int rotationIndex { get; private set; }
 
-    public float stepDelay = 1f;
+    public static float stepDelay = 1f;
     public float moveDelay = 0.1f;
     public float lockDelay = 0.5f;
 
@@ -16,8 +16,25 @@ public class Piece : MonoBehaviour
     private float moveTime;
     private float lockTime;
 
+    Score score;
+
+    //Touch Input Variables
+    private Vector2 startTouchPosition;
+    private Vector2 currentPosition;
+    private Vector2 endTouchPosition;
+    private bool stopTouch = false;
+    private bool moving = false;
+    private bool movingDown = false;
+    private float touchDelay = 0.2f;
+    private float touchTime;
+    private float swipeRange = 65f;
+    private float dropRange = 150f;
+    private float tapRange = 65f;
+
     public void Initialize(Board board, Vector3Int position, TetrominoData data)
     {
+        score = GameObject.FindObjectOfType<Score>();
+
         this.data = data;
         this.board = board;
         this.position = position;
@@ -46,6 +63,86 @@ public class Piece : MonoBehaviour
         // before it locks in place
         lockTime += Time.deltaTime;
 
+        if (!Menu.gamePaused)
+        {
+            TouchInput();
+            HandleKeyInputs();
+        }
+
+        // Advance the piece to the next row every x seconds
+        if (Time.time > stepTime)
+        {
+            Step();
+        }
+
+        board.Set(this);
+    }
+
+    private void TouchInput()
+    {
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            startTouchPosition = Input.GetTouch(0).position;
+
+        }
+        if (Input.touchCount > 0 && (Input.GetTouch(0).phase == TouchPhase.Moved || moving))
+        {
+            currentPosition = Input.GetTouch(0).position;
+            Vector2 Distance = currentPosition - startTouchPosition;
+
+            if (!stopTouch)
+            {
+                if (Distance.x < -swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+                {
+                    Move(Vector2Int.left);
+                    startTouchPosition.x -= swipeRange;
+                    moving = true;
+                }
+
+                else if (Distance.x > swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+                {
+                    Move(Vector2Int.right);
+                    startTouchPosition.x += swipeRange;
+                    moving = true;
+                }
+
+                if (movingDown || (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
+                {
+                    Move(Vector2Int.down);
+                    if (!movingDown)
+                    {
+                        touchTime = Time.time + touchDelay;
+                    }
+                    else if (Distance.y < -dropRange && Time.time >= touchTime)
+                    {
+                        startTouchPosition.y = currentPosition.y;
+                    }
+                    moving = true;
+                    movingDown = true;
+
+                }
+            }
+        }
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended)
+        {
+            stopTouch = false;
+            endTouchPosition = Input.GetTouch(0).position;
+            Vector2 Distance = endTouchPosition - startTouchPosition;
+            if (Mathf.Abs(Distance.x) < tapRange && Mathf.Abs(Distance.y) < tapRange && !moving)
+            {
+                Rotate(1);
+            }
+            else if (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x) && Time.time < touchTime)
+            {
+                HardDrop();
+            }
+            moving = false;
+            movingDown = false;
+        }
+    }
+
+    private void HandleKeyInputs()
+    {
         // Handle rotation
         if (Input.GetKeyDown(KeyCode.Q))
         {
@@ -68,14 +165,6 @@ public class Piece : MonoBehaviour
         {
             HandleMoveInputs();
         }
-
-        // Advance the piece to the next row every x seconds
-        if (Time.time > stepTime)
-        {
-            Step();
-        }
-
-        board.Set(this);
     }
 
     private void HandleMoveInputs()
@@ -108,6 +197,8 @@ public class Piece : MonoBehaviour
         // Step down to the next row
         Move(Vector2Int.down);
 
+        score.ResetMultiplier();
+
         // Once the piece has been inactive for too long it becomes locked
         if (lockTime >= lockDelay)
         {
@@ -127,6 +218,8 @@ public class Piece : MonoBehaviour
 
     private void Lock()
     {
+        score.AddScore(10);
+
         board.Set(this);
         board.ClearLines();
         board.SpawnPiece();
