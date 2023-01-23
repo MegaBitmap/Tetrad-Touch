@@ -12,7 +12,7 @@ public class Score : MonoBehaviour
     private int scoreInt;
     private int levelInt;
     private int highscoreInt;
-    private int scoreMultiplier;
+    private int scoreMultiplier = 1;
 
     // Start is called before the first frame update
     void Start()
