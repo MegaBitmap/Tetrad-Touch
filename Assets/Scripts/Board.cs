@@ -114,6 +114,7 @@ public class Board : MonoBehaviour
     {
         tilemap.ClearAllTiles();
         score.ResetScore();
+        score.SetLevel(1);
         lineClears = 0;
     }
 
