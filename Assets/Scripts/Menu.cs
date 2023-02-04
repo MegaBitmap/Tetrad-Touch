@@ -23,13 +23,13 @@ public class Menu : MonoBehaviour
         score = GameObject.FindObjectOfType<Score>();
         Time.timeScale = 0f;
 
-        if (PlayerPrefs.GetInt("enableGhost") == 1)
+        if (PlayerPrefs.GetInt("enableGhost", 1) == 1)
         {
             toggleGhost.isOn = true;
             ghost.SetActive(true);
         }
 
-        if (PlayerPrefs.GetInt("fullscreen") == 1)
+        if (PlayerPrefs.GetInt("fullscreen", 1) == 1)
         {
             toggleFullscreen.isOn = true;
             Screen.fullScreen = true;
