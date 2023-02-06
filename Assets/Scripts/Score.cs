@@ -9,9 +9,9 @@ public class Score : MonoBehaviour
     public TMP_Text score;
     public TMP_Text level;
     public TMP_Text highscore;
-    private int scoreInt;
+    static public int scoreInt { get; private set; }
     private int levelInt;
-    private int highscoreInt;
+    static public int highscoreInt { get; private set; }
     private int scoreMultiplier = 1;
 
     // Start is called before the first frame update

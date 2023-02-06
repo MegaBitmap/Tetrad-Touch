@@ -17,6 +17,7 @@ public class Board : MonoBehaviour
     private int random;
     private bool pieceLoaded = false;
     Score score;
+    Menu menu;
     
     public RectInt Bounds
     {
@@ -29,6 +30,7 @@ public class Board : MonoBehaviour
 
     private void Awake()
     {
+        menu = GameObject.FindAnyObjectByType<Menu>();
         score = GameObject.FindObjectOfType<Score>();
         tilemap = GetComponentInChildren<Tilemap>();
         activePiece = GetComponentInChildren<Piece>();
@@ -41,8 +43,11 @@ public class Board : MonoBehaviour
 
     public void Start()
     {
+        Piece.startTouchPosition.Set(0, -10000); //prevent hard drop of first piece after gameover
         random = Random.Range(0, tetrominoes.Length);
         score.ResetScore();
+        score.SetLevel(1);
+        tilemap.ClearAllTiles();
         lineClears = 0;
         SpawnPiece();
     }
@@ -112,10 +117,14 @@ public class Board : MonoBehaviour
 
     public void GameOver()
     {
+        menu.TransferScore();
+
         tilemap.ClearAllTiles();
         score.ResetScore();
         score.SetLevel(1);
         lineClears = 0;
+
+        menu.ShowGameOver();
     }
 
     public void Set(Piece piece)

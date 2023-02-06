@@ -19,10 +19,9 @@ public class Piece : MonoBehaviour
     Score score;
 
     //Touch Input Variables
-    private Vector2 startTouchPosition;
+    public static Vector2 startTouchPosition;
     private Vector2 currentPosition;
     private Vector2 endTouchPosition;
-    private bool stopTouch = false;
     private bool moving = false;
     private bool movingDown = false;
     private float touchDelay = 0.2f;
@@ -90,42 +89,39 @@ public class Piece : MonoBehaviour
             currentPosition = Input.GetTouch(0).position;
             Vector2 Distance = currentPosition - startTouchPosition;
 
-            if (!stopTouch)
+            if (Distance.x < -swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
             {
-                if (Distance.x < -swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
-                {
-                    Move(Vector2Int.left);
-                    startTouchPosition.x -= swipeRange;
-                    moving = true;
-                }
+                Move(Vector2Int.left);
+                startTouchPosition.x -= swipeRange;
+                moving = true;
+            }
 
-                else if (Distance.x > swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
-                {
-                    Move(Vector2Int.right);
-                    startTouchPosition.x += swipeRange;
-                    moving = true;
-                }
+            else if (Distance.x > swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+            {
+                Move(Vector2Int.right);
+                startTouchPosition.x += swipeRange;
+                moving = true;
+            }
 
-                if (movingDown || (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
+            if (movingDown || (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
+            {
+                Move(Vector2Int.down);
+                if (!movingDown)
                 {
-                    Move(Vector2Int.down);
-                    if (!movingDown)
-                    {
-                        touchTime = Time.time + touchDelay;
-                    }
-                    else if (Distance.y < -dropRange && Time.time >= touchTime)
-                    {
-                        startTouchPosition.y = currentPosition.y;
-                    }
-                    moving = true;
-                    movingDown = true;
-
+                    touchTime = Time.time + touchDelay;
                 }
+                else if (Distance.y < -dropRange && Time.time >= touchTime)
+                {
+                    startTouchPosition.y = currentPosition.y;
+                }
+                moving = true;
+                movingDown = true;
+
             }
         }
+        
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended)
         {
-            stopTouch = false;
             endTouchPosition = Input.GetTouch(0).position;
             Vector2 Distance = endTouchPosition - startTouchPosition;
             if (Mathf.Abs(Distance.x) < tapRange && Mathf.Abs(Distance.y) < tapRange && !moving)
@@ -334,5 +330,4 @@ public class Piece : MonoBehaviour
             return min + (input - min) % (max - min);
         }
     }
-
 }

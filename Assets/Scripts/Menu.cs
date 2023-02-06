@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class Menu : MonoBehaviour
 {
@@ -10,6 +11,13 @@ public class Menu : MonoBehaviour
     public GameObject pauseMenu;
     public static bool gamePaused = true;
     private bool boardLoaded = false;
+
+    public GameObject gameOver;
+    public TMP_Text endScoreTxt;
+    public TMP_Text endHighscoreTxt;
+    public TMP_Text endMessage;
+    private int endScoreInt;
+    private int endHighscoreInt;
 
     public Toggle toggleFullscreen;
     public Toggle toggleNotificationBar;
@@ -78,9 +86,9 @@ public class Menu : MonoBehaviour
     {
         Time.timeScale = 1f;
         pauseMenu.SetActive(false);
+        gameOver.SetActive(false);
         gamePaused = false;
         
-        board.GameOver();
         board.Start();
 
     }
@@ -91,7 +99,6 @@ public class Menu : MonoBehaviour
         pauseMenu.SetActive(false);
         gamePaused = false;
         
-        board.GameOver();
         board.Start();
 
         score.SetLevel(int.Parse(setLevel));
@@ -142,7 +149,37 @@ public class Menu : MonoBehaviour
         Exit();
     }
 
-    private void EnableNotificationBar()
+    public void TransferScore()
+    {
+        endScoreInt = Score.scoreInt;
+        endHighscoreInt = Score.highscoreInt;
+        endScoreTxt.text = endScoreInt.ToString();
+        endHighscoreTxt.text = endHighscoreInt.ToString();
+
+    }
+
+    public void ShowGameOver()
+    {
+        Time.timeScale = 0f;
+        gamePaused = true;
+        gameOver.SetActive(true);
+        if (endScoreInt == endHighscoreInt)
+        {
+            endMessage.text = "New Highscore!";
+        }
+        else
+        {
+            endMessage.text = "";
+        }
+    }
+
+    public void ExitGameOver()
+    {
+        gameOver.SetActive(false);
+        pauseMenu.SetActive(true);
+    }
+
+    private void EnableNotificationBar() //update if there is a cleaner way to do this
     {
         using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
         {
