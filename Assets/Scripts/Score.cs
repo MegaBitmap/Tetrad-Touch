@@ -53,6 +53,8 @@ public class Score : MonoBehaviour
     {
         levelInt += addLevel;
         level.text = "Level " + levelInt.ToString();
+
+        Piece.stepDelay = (float)(1 / ((levelInt - 1) * .5 + 1));
     }
  
     public void SaveScore()
