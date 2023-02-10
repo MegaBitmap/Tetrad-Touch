@@ -29,6 +29,7 @@ public class Piece : MonoBehaviour
     private float swipeRange = 65f;
     private float dropRange = 150f;
     private float tapRange = 65f;
+    public static bool leftCounterclockwise = false;
 
     public void Initialize(Board board, Vector3Int position, TetrominoData data)
     {
@@ -126,7 +127,14 @@ public class Piece : MonoBehaviour
             Vector2 Distance = endTouchPosition - startTouchPosition;
             if (Mathf.Abs(Distance.x) < tapRange && Mathf.Abs(Distance.y) < tapRange && !moving)
             {
-                Rotate(1);
+                if (leftCounterclockwise && endTouchPosition.x < Screen.width / 2)
+                {
+                    Rotate(-1);
+                }
+                else
+                {
+                    Rotate(1);
+                }
             }
             else if (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x) && Time.time < touchTime)
             {

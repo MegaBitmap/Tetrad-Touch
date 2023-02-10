@@ -21,7 +21,10 @@ public class Menu : MonoBehaviour
 
     public Toggle toggleFullscreen;
     public Toggle toggleNotificationBar;
+    public Toggle toggleLeftCounterclockwise;
     public Toggle toggleGhost;
+    public Toggle toggleGrid;
+    public GameObject grid;
     public GameObject ghost;
 
     // Start is called before the first frame update
@@ -30,6 +33,18 @@ public class Menu : MonoBehaviour
         board = GameObject.FindObjectOfType<Board>();
         score = GameObject.FindObjectOfType<Score>();
         Time.timeScale = 0f;
+
+        if (PlayerPrefs.GetInt("enableLeftCounterclockwise", 1) == 1)
+        {
+            toggleLeftCounterclockwise.isOn = true;
+            Piece.leftCounterclockwise = true;
+        }
+
+        if (PlayerPrefs.GetInt("enableGrid", 1) == 1)
+        {
+            toggleGrid.isOn = true;
+            grid.SetActive(true);
+        }
 
         if (PlayerPrefs.GetInt("enableGhost", 1) == 1)
         {
@@ -144,6 +159,24 @@ public class Menu : MonoBehaviour
         else
         {
             PlayerPrefs.SetInt("enableGhost", 0);
+        }
+
+        if (toggleGrid.isOn)
+        {
+            PlayerPrefs.SetInt("enableGrid", 1);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("enableGrid", 0);
+        }
+
+        if (toggleLeftCounterclockwise.isOn)
+        {
+            PlayerPrefs.SetInt("enableLeftCounterclockwise", 1);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("enableLeftCounterclockwise", 0);
         }
 
         Exit();
