@@ -28,6 +28,15 @@ public class Board : MonoBehaviour
         }
     }
 
+    public RectInt NoTopBounds
+    {
+        get
+        {
+            Vector2Int position = new Vector2Int(-boardSize.x / 2, -boardSize.y / 2);
+            return new RectInt(position, new Vector2Int(10, 21));
+        }
+    }
+
     private void Awake()
     {
         menu = GameObject.FindAnyObjectByType<Menu>();
@@ -147,7 +156,7 @@ public class Board : MonoBehaviour
 
     public bool IsValidPosition(Piece piece, Vector3Int position)
     {
-        RectInt bounds = Bounds;
+        RectInt bounds = NoTopBounds;
 
         // The position is only valid if every cell is valid
         for (int i = 0; i < piece.cells.Length; i++)

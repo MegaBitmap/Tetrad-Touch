@@ -26,8 +26,8 @@ public class Piece : MonoBehaviour
     private bool movingDown = false;
     private float touchDelay = 0.2f;
     private float touchTime;
-    private float swipeRange = 65f;
-    private float dropRange = 150f;
+    public static float leftRightSensitivity = 65f;
+    public static float hardDropSensitivity = 150f;
     private float tapRange = 65f;
     public static bool leftCounterclockwise = false;
 
@@ -90,28 +90,28 @@ public class Piece : MonoBehaviour
             currentPosition = Input.GetTouch(0).position;
             Vector2 Distance = currentPosition - startTouchPosition;
 
-            if (Distance.x < -swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+            if (Distance.x < -leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
             {
                 Move(Vector2Int.left);
-                startTouchPosition.x -= swipeRange;
+                startTouchPosition.x -= leftRightSensitivity;
                 moving = true;
             }
 
-            else if (Distance.x > swipeRange && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+            else if (Distance.x > leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
             {
                 Move(Vector2Int.right);
-                startTouchPosition.x += swipeRange;
+                startTouchPosition.x += leftRightSensitivity;
                 moving = true;
             }
 
-            if (movingDown || (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
+            if (movingDown || (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
             {
                 Move(Vector2Int.down);
                 if (!movingDown)
                 {
                     touchTime = Time.time + touchDelay;
                 }
-                else if (Distance.y < -dropRange && Time.time >= touchTime)
+                else if (Distance.y < -hardDropSensitivity && Time.time >= touchTime)
                 {
                     startTouchPosition.y = currentPosition.y;
                 }
@@ -136,7 +136,7 @@ public class Piece : MonoBehaviour
                     Rotate(1);
                 }
             }
-            else if (Distance.y < -dropRange && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x) && Time.time < touchTime)
+            else if (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x) && Time.time < touchTime)
             {
                 HardDrop();
             }

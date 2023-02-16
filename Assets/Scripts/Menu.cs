@@ -16,6 +16,8 @@ public class Menu : MonoBehaviour
     public TMP_Text endScoreTxt;
     public TMP_Text endHighscoreTxt;
     public TMP_Text endMessage;
+    public TMP_Text leftRightText;
+    public TMP_Text hardDropText;
     private int endScoreInt;
     private int endHighscoreInt;
 
@@ -33,6 +35,13 @@ public class Menu : MonoBehaviour
         board = GameObject.FindObjectOfType<Board>();
         score = GameObject.FindObjectOfType<Score>();
         Time.timeScale = 0f;
+
+
+        Piece.leftRightSensitivity = PlayerPrefs.GetInt("leftRightSensitivity", 65);
+        leftRightText.text = Piece.leftRightSensitivity.ToString();
+
+        Piece.hardDropSensitivity = PlayerPrefs.GetInt("hardDropSensitivity", 150);
+        hardDropText.text = Piece.hardDropSensitivity.ToString();
 
         if (PlayerPrefs.GetInt("enableLeftCounterclockwise", 1) == 1)
         {
@@ -118,6 +127,18 @@ public class Menu : MonoBehaviour
 
         score.SetLevel(int.Parse(setLevel));
 
+    }
+
+    public void SetLeftRightSensitivity(string setRange)
+    {
+        PlayerPrefs.SetInt("leftRightSensitivity", int.Parse(setRange));
+        Piece.leftRightSensitivity = int.Parse(setRange);
+    }
+
+    public void SetHardDropSensitivity(string setRange)
+    {
+        PlayerPrefs.SetInt("hardDropSensitivity", int.Parse(setRange));
+        Piece.hardDropSensitivity = int.Parse(setRange);
     }
 
     public void ResetAll()
