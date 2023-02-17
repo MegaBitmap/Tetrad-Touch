@@ -92,16 +92,30 @@ public class Piece : MonoBehaviour
 
             if (Distance.x < -leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
             {
-                Move(Vector2Int.left);
-                startTouchPosition.x -= leftRightSensitivity;
-                moving = true;
+                float tempDistance = Distance.x;
+                
+                while (tempDistance < -leftRightSensitivity)
+                {
+                    Move(Vector2Int.left);
+                    startTouchPosition.x -= leftRightSensitivity;
+                    moving = true;
+                    tempDistance = currentPosition.x - startTouchPosition.x;
+                }
+                
             }
 
             else if (Distance.x > leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
             {
-                Move(Vector2Int.right);
-                startTouchPosition.x += leftRightSensitivity;
-                moving = true;
+                float tempDistance2 = Distance.x;
+
+                while (tempDistance2 > leftRightSensitivity)
+                {
+                    Move(Vector2Int.right);
+                    startTouchPosition.x += leftRightSensitivity;
+                    moving = true;
+                    tempDistance2 = currentPosition.x - startTouchPosition.x;
+                }
+                
             }
 
             if (movingDown || (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
