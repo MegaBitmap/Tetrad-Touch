@@ -133,6 +133,11 @@ public class Piece : MonoBehaviour
                 movingDown = true;
 
             }
+
+            else if (!moving && Distance.y > hardDropSensitivity && 120 > Mathf.Abs(Distance.x))
+            {
+                board.SwapPiece();
+            }
         }
         
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended)
@@ -237,7 +242,7 @@ public class Piece : MonoBehaviour
     private void Lock()
     {
         score.AddScore(10);
-
+        Board.pieceSwapped = false;
         board.Set(this);
         board.ClearLines();
         board.SpawnPiece();

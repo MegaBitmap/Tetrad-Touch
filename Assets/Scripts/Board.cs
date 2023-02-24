@@ -5,17 +5,22 @@ public class Board : MonoBehaviour
 {
     public Tilemap tilemap { get; private set; }
     public Piece activePiece { get; private set; }
+    public Piece nextPiece { get; private set; }
+    public Piece savedPiece { get; private set; }
 
     public TetrominoData[] tetrominoes;
     public Vector2Int boardSize = new Vector2Int(10, 20);
     public Vector3Int spawnPosition = new Vector3Int(-1, 8, 0);
-    public Vector3Int iPosition = new Vector3Int(-4, 10, 0);
-    public Vector3Int nextPosition = new Vector3Int(-4, 11, 0);
+    public Vector3Int holdiPosition = new Vector3Int(-4, 10, 0);
+    public Vector3Int previewPosition = new Vector3Int(3, 11, 0);
+    public Vector3Int previewiPosition = new Vector3Int(2, 10, 0);
+    public Vector3Int holdPosition = new Vector3Int(-4, 11, 0);
+
     public Vector3Int[] cells { get; private set; }
     public TetrominoData data;
     private int lineClears;
-    private int random;
-    private bool pieceLoaded = false;
+    private bool pieceHeld = false;
+    public static bool pieceSwapped;
     Score score;
     Menu menu;
     
@@ -43,6 +48,11 @@ public class Board : MonoBehaviour
         score = GameObject.FindObjectOfType<Score>();
         tilemap = GetComponentInChildren<Tilemap>();
         activePiece = GetComponentInChildren<Piece>();
+        nextPiece = gameObject.AddComponent<Piece>();
+        nextPiece.enabled = false;
+        savedPiece = gameObject.AddComponent<Piece>();
+        savedPiece.enabled = false;
+
 
         for (int i = 0; i < tetrominoes.Length; i++)
         {
@@ -53,38 +63,48 @@ public class Board : MonoBehaviour
     public void Start()
     {
         Piece.startTouchPosition.Set(0, -10000); //prevent hard drop of first piece after gameover
-        random = Random.Range(0, tetrominoes.Length);
+        pieceSwapped = false;
+        pieceHeld = false;
         score.ResetScore();
         score.SetLevel(1);
         tilemap.ClearAllTiles();
         lineClears = 0;
+        SetNextPiece();
         SpawnPiece();
+    }
+
+    private void SetNextPiece()
+    {
+        // Clear the existing piece from the board
+        if (nextPiece.cells != null)
+        {
+            Clear(nextPiece);
+        }
+
+        // Pick a random tetromino to use
+        int random = Random.Range(0, tetrominoes.Length);
+        TetrominoData data = tetrominoes[random];
+
+        // Initialize the next piece with the random data
+        // Draw it at the "preview" position on the board
+        if (random == 0)
+        {
+            nextPiece.Initialize(this, previewiPosition, data);
+        }
+        else
+        {
+            nextPiece.Initialize(this, previewPosition, data);
+        }
+        
+        Set(nextPiece);
     }
 
     public void SpawnPiece()
     {
-        if (pieceLoaded)
-        {
-            if (random == 0)
-            {
-                for (int i = 0; i < data.cells.Length; i++)
-                {
-                    Vector3Int tilePosition = (Vector3Int)data.cells[i] + iPosition;
-                    tilemap.SetTile(tilePosition, null);
-                }
-            }
-            else {
-                for (int i = 0; i < data.cells.Length; i++)
-                {
-                    Vector3Int tilePosition = (Vector3Int)data.cells[i] + nextPosition;
-                    tilemap.SetTile(tilePosition, null);
-                }
-            }
-        }
-        data = tetrominoes[random];
+        // Initialize the active piece with the next piece data
+        activePiece.Initialize(this, spawnPosition, nextPiece.data);
 
-        activePiece.Initialize(this, spawnPosition, data);
-
+        // Only spawn the piece if valid position otherwise game over
         if (IsValidPosition(activePiece, spawnPosition))
         {
             Set(activePiece);
@@ -94,34 +114,8 @@ public class Board : MonoBehaviour
             GameOver();
         }
 
-        random = Random.Range(0, tetrominoes.Length);
-        data = tetrominoes[random];
-        pieceLoaded = true;
-
-        if (cells == null)
-        {
-            cells = new Vector3Int[data.cells.Length];
-        }
-        for (int i = 0; i < data.cells.Length; i++)
-        {
-            cells[i] = (Vector3Int)data.cells[i];
-        }
-        if (random == 0)
-        {
-            for (int i = 0; i < data.cells.Length; i++)
-            {
-                Vector3Int tilePosition = (Vector3Int)data.cells[i] + iPosition;
-                tilemap.SetTile(tilePosition, data.tile);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < data.cells.Length; i++)
-            {
-                Vector3Int tilePosition = (Vector3Int)data.cells[i] + nextPosition;
-                tilemap.SetTile(tilePosition, data.tile);
-            }
-        }
+        // Set the next random piece
+        SetNextPiece();
     }
 
     public void GameOver()
@@ -152,6 +146,54 @@ public class Board : MonoBehaviour
             Vector3Int tilePosition = piece.cells[i] + piece.position;
             tilemap.SetTile(tilePosition, null);
         }
+    }
+
+    public void SwapPiece()
+    {
+        // Temporarily store the current saved data so we can swap
+        TetrominoData savedData = savedPiece.data;
+        TetrominoData currentPiece = activePiece.data;
+
+        if (pieceSwapped || savedPiece.data.tile == activePiece.data.tile)
+        {
+            return;
+        }
+        pieceSwapped = true;
+
+        // Clear the existing saved piece from the board
+        if (savedData.cells != null)
+        {
+            Clear(savedPiece);
+        }
+
+        // Store the active piece as the new saved piece
+        // Draw this piece at the "hold" position on the board
+        if (currentPiece.tile == tetrominoes[0].tile)
+        {
+            savedPiece.Initialize(this, holdiPosition, currentPiece);
+        }
+        else
+        {
+            savedPiece.Initialize(this, holdPosition, currentPiece);
+        }
+        
+        Set(savedPiece);
+
+        // Swap the saved piece to be the active piece
+        if (pieceHeld)
+        {
+            // Clear the existing active piece before swapping
+            Clear(activePiece);
+
+            // Re-initialize the active piece with the saved data
+            activePiece.Initialize(this, spawnPosition, savedData);
+            Set(activePiece);
+        }
+        else
+        {
+            SpawnPiece();
+        }
+        pieceHeld = true;
     }
 
     public bool IsValidPosition(Piece piece, Vector3Int position)
