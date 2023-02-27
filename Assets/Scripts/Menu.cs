@@ -235,25 +235,13 @@ public class Menu : MonoBehaviour
 
     private void EnableNotificationBar() //update if there is a cleaner way to do this
     {
-        using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-        {
-            using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
-            {
-                using (var window = activity.Call<AndroidJavaObject>("getWindow"))
-                {
-                    window.Call("setStatusBarColor", unchecked((int)0x00005700)); //for transparent status bar
-                    using (var Decor = window.Call<AndroidJavaObject>("getDecorView"))
-                    {
-                        using (var controller = Decor.Call<AndroidJavaObject>("getWindowInsetsController"))
-                        {
-                            using (var type = new AndroidJavaClass("android.view.WindowInsets$Type"))
-                            {
-                                controller.Call("show", type.CallStatic<int>("statusBars"));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        using AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        using AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+        using AndroidJavaObject window = activity.Call<AndroidJavaObject>("getWindow");
+        window.Call("setStatusBarColor", unchecked((int)0x00005700)); //for transparent status bar
+        using AndroidJavaObject Decor = window.Call<AndroidJavaObject>("getDecorView");
+        using AndroidJavaObject controller = Decor.Call<AndroidJavaObject>("getWindowInsetsController");
+        using AndroidJavaClass type = new AndroidJavaClass("android.view.WindowInsets$Type");
+        controller.Call("show", type.CallStatic<int>("statusBars"));
     }
 }

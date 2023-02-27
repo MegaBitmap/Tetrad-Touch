@@ -33,7 +33,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    public RectInt NoTopBounds
+    public RectInt NoTopBounds //allows pieces to occypy 1 tile above main board
     {
         get
         {
@@ -118,6 +118,54 @@ public class Board : MonoBehaviour
         SetNextPiece();
     }
 
+    public void SwapPiece()
+    {
+        // Temporarily store the current saved data so we can swap
+        TetrominoData savedData = savedPiece.data;
+        TetrominoData currentPiece = activePiece.data;
+
+        if ((pieceSwapped || savedPiece.data.tile == activePiece.data.tile) && pieceHeld)
+        {
+            return;
+        }
+        pieceSwapped = true;
+
+        // Clear the existing saved piece from the board
+        if (savedData.cells != null)
+        {
+            Clear(savedPiece);
+        }
+
+        // Store the active piece as the new saved piece
+        // Draw this piece at the "hold" position on the board
+        if (currentPiece.tile == tetrominoes[0].tile) //checks For I piece
+        {
+            savedPiece.Initialize(this, holdiPosition, currentPiece); //I piece is set to a different position
+        }
+        else
+        {
+            savedPiece.Initialize(this, holdPosition, currentPiece);
+        }
+
+        Set(savedPiece);
+
+        // Swap the saved piece to be the active piece
+        if (pieceHeld)
+        {
+            // Clear the existing active piece before swapping
+            Clear(activePiece);
+
+            // Re-initialize the active piece with the saved data
+            activePiece.Initialize(this, spawnPosition, savedData);
+            Set(activePiece);
+        }
+        else
+        {
+            SpawnPiece();
+        }
+        pieceHeld = true;
+    }
+
     public void GameOver()
     {
         menu.TransferScore();
@@ -146,54 +194,6 @@ public class Board : MonoBehaviour
             Vector3Int tilePosition = piece.cells[i] + piece.position;
             tilemap.SetTile(tilePosition, null);
         }
-    }
-
-    public void SwapPiece()
-    {
-        // Temporarily store the current saved data so we can swap
-        TetrominoData savedData = savedPiece.data;
-        TetrominoData currentPiece = activePiece.data;
-
-        if (pieceSwapped || savedPiece.data.tile == activePiece.data.tile)
-        {
-            return;
-        }
-        pieceSwapped = true;
-
-        // Clear the existing saved piece from the board
-        if (savedData.cells != null)
-        {
-            Clear(savedPiece);
-        }
-
-        // Store the active piece as the new saved piece
-        // Draw this piece at the "hold" position on the board
-        if (currentPiece.tile == tetrominoes[0].tile)
-        {
-            savedPiece.Initialize(this, holdiPosition, currentPiece);
-        }
-        else
-        {
-            savedPiece.Initialize(this, holdPosition, currentPiece);
-        }
-        
-        Set(savedPiece);
-
-        // Swap the saved piece to be the active piece
-        if (pieceHeld)
-        {
-            // Clear the existing active piece before swapping
-            Clear(activePiece);
-
-            // Re-initialize the active piece with the saved data
-            activePiece.Initialize(this, spawnPosition, savedData);
-            Set(activePiece);
-        }
-        else
-        {
-            SpawnPiece();
-        }
-        pieceHeld = true;
     }
 
     public bool IsValidPosition(Piece piece, Vector3Int position)
@@ -301,7 +301,22 @@ public class Board : MonoBehaviour
     {
         Clear(activePiece);
         score.SaveScore();
-
+        if (pieceHeld)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                if (savedPiece.data.tile == tetrominoes[i].tile)
+                {
+                    PlayerPrefs.SetInt("savedPiece", 1);
+                    PlayerPrefs.SetInt("savedPieceTile", i);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            PlayerPrefs.SetInt("savedPiece", 0);
+        }
         RectInt bounds = Bounds;
         for (int col = bounds.xMin; col < bounds.xMax; col++)
         {
@@ -312,11 +327,11 @@ public class Board : MonoBehaviour
                 if (tilemap.HasTile(position))
                 {
                     PlayerPrefs.SetInt(col + "_pos_" + row, 1);
-                    for (int i = 0; i < 7; i++)
+                    for (int i = 0; i < 7; i++) //keep checking until the right tile is found
                     {
                         if (temp == tetrominoes[i].tile)
                         {
-                            PlayerPrefs.SetInt(col + "_color_" + row, i);
+                            PlayerPrefs.SetInt(col + "_color_" + row, i); //save sprite tile info for every position
                             break;
                         }
                     }
@@ -332,7 +347,21 @@ public class Board : MonoBehaviour
     public void Load()
     {
         score.LoadScore();
-
+        if (PlayerPrefs.GetInt("savedPiece") == 1)
+        {
+            TetrominoData data = tetrominoes[PlayerPrefs.GetInt("savedPieceTile")];
+            // Draw this piece at the "hold" position on the board
+            if (data.tile == tetrominoes[0].tile) //checks For I piece
+            {
+                savedPiece.Initialize(this, holdiPosition, data); //I piece is set to a different position
+            }
+            else
+            {
+                savedPiece.Initialize(this, holdPosition, data);
+            }
+            Set(savedPiece);
+            pieceHeld = true;
+        }
         RectInt bounds = Bounds;
         for (int col = bounds.xMin; col < bounds.xMax; col++)
         {

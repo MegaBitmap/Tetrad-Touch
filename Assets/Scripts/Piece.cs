@@ -90,7 +90,7 @@ public class Piece : MonoBehaviour
             currentPosition = Input.GetTouch(0).position;
             Vector2 Distance = currentPosition - startTouchPosition;
 
-            if (Distance.x < -leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+            if (Distance.x < -leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x)) //detect swipe left
             {
                 float tempDistance = Distance.x;
                 
@@ -104,7 +104,7 @@ public class Piece : MonoBehaviour
                 
             }
 
-            else if (Distance.x > leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x))
+            else if (Distance.x > leftRightSensitivity && Mathf.Abs(Distance.y) < Mathf.Abs(Distance.x)) //detect swipe right
             {
                 float tempDistance2 = Distance.x;
 
@@ -118,7 +118,7 @@ public class Piece : MonoBehaviour
                 
             }
 
-            if (movingDown || (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x)))
+            if (movingDown || (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x))) //detect swipe down
             {
                 Move(Vector2Int.down);
                 if (!movingDown)
@@ -134,7 +134,7 @@ public class Piece : MonoBehaviour
 
             }
 
-            else if (!moving && Distance.y > hardDropSensitivity && 120 > Mathf.Abs(Distance.x))
+            else if (!moving && Distance.y > hardDropSensitivity && 120 > Mathf.Abs(Distance.x)) //detect swipe up
             {
                 board.SwapPiece();
             }
@@ -144,7 +144,7 @@ public class Piece : MonoBehaviour
         {
             endTouchPosition = Input.GetTouch(0).position;
             Vector2 Distance = endTouchPosition - startTouchPosition;
-            if (Mathf.Abs(Distance.x) < tapRange && Mathf.Abs(Distance.y) < tapRange && !moving)
+            if (Mathf.Abs(Distance.x) < tapRange && Mathf.Abs(Distance.y) < tapRange && endTouchPosition.y < Screen.height * 0.86 && !moving) //detect tap
             {
                 if (leftCounterclockwise && endTouchPosition.x < Screen.width / 2)
                 {
@@ -155,7 +155,7 @@ public class Piece : MonoBehaviour
                     Rotate(1);
                 }
             }
-            else if (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x) && Time.time < touchTime)
+            else if (Distance.y < -hardDropSensitivity && Mathf.Abs(Distance.y) > Mathf.Abs(Distance.x) && Time.time < touchTime) //detect quick swipe down
             {
                 HardDrop();
             }
