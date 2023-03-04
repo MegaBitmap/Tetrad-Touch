@@ -592,7 +592,7 @@ GameObject:
   - component: {fileID: 225849383}
   - component: {fileID: 225849382}
   m_Layer: 5
-  m_Name: Hold
+  m_Name: HoldButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -662,9 +662,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1183500126}
-        m_TargetAssemblyTypeName: Board, Assembly-CSharp
-        m_MethodName: SwapPiece
+      - m_Target: {fileID: 1183500125}
+        m_TargetAssemblyTypeName: Piece, Assembly-CSharp
+        m_MethodName: SwapNextFrame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4674,7 +4674,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Ver 2023Feb27
+  m_text: Ver 0.1.1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

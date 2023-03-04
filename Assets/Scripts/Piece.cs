@@ -30,6 +30,7 @@ public class Piece : MonoBehaviour
     public static float hardDropSensitivity = 150f;
     private float tapRange = 65f;
     public static bool leftCounterclockwise = false;
+    private static bool swap = false;
 
     public void Initialize(Board board, Vector3Int position, TetrominoData data)
     {
@@ -67,6 +68,7 @@ public class Piece : MonoBehaviour
         {
             TouchInput();
             HandleKeyInputs();
+            SwapThisFrame();
         }
 
         // Advance the piece to the next row every x seconds
@@ -355,6 +357,20 @@ public class Piece : MonoBehaviour
         else
         {
             return min + (input - min) % (max - min);
+        }
+    }
+
+    public void SwapNextFrame()
+    {
+        swap = true;
+    }
+
+    private void SwapThisFrame()
+    {
+        if (swap)
+        {
+            board.SwapPiece();
+            swap = false;
         }
     }
 }
