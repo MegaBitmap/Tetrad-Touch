@@ -81,7 +81,10 @@ public class Menu : MonoBehaviour
         if (!focus)
         {
             Pause();
-            board.Save();
+            if (boardLoaded)
+            {
+                board.Save();
+            }
             PlayerPrefs.Save();
         }
     }
