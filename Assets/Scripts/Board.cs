@@ -225,6 +225,7 @@ public class Board : MonoBehaviour
     {
         RectInt bounds = Bounds;
         int row = bounds.yMin;
+        bool lineCleared = false;
 
         // Clear from bottom to top
         while (row < bounds.yMax)
@@ -234,11 +235,16 @@ public class Board : MonoBehaviour
             if (IsLineFull(row))
             {
                 LineClear(row);
+                lineCleared = true;
             }
             else
             {
                 row++;
             }
+        }
+        if (!lineCleared)
+        {
+            score.ResetMultiplier();
         }
     }
 

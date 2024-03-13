@@ -152,7 +152,11 @@ public class Menu : MonoBehaviour
 
     public void Exit()
     {
-        board.Save();
+        if (boardLoaded)
+        {
+            board.Save();
+        }
+        PlayerPrefs.Save();
         Application.Quit();
     }
 

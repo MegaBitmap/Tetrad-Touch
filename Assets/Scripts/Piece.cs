@@ -222,8 +222,6 @@ public class Piece : MonoBehaviour
         // Step down to the next row
         Move(Vector2Int.down);
 
-        score.ResetMultiplier();
-
         // Once the piece has been inactive for too long it becomes locked
         if (lockTime >= lockDelay)
         {

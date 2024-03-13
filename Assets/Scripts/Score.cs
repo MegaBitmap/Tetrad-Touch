@@ -32,7 +32,14 @@ public class Score : MonoBehaviour
     public void AddScore(int addScore)
     {
         scoreInt += addScore * scoreMultiplier;
-        score.text = scoreInt.ToString();
+        if (scoreMultiplier > 1)
+        {
+            score.text = scoreMultiplier.ToString() + "X " + scoreInt.ToString();
+        }
+        else
+        {
+            score.text = scoreInt.ToString();
+        }
         if (scoreInt > highscoreInt)
         {
             PlayerPrefs.SetInt("highscore", scoreInt);
@@ -78,5 +85,6 @@ public class Score : MonoBehaviour
     public void ResetMultiplier()
     {
         scoreMultiplier = 1;
+        score.text = scoreInt.ToString();
     }
 }
