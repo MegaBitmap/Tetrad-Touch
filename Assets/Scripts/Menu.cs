@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class Menu : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class Menu : MonoBehaviour
     public Toggle toggleGrid;
     public GameObject grid;
     public GameObject ghost;
+    private double defaultLeftRightSensitivity;
+    private double defaultHardDropSensitivity;
 
     // Start is called before the first frame update
     void Start()
@@ -37,10 +40,14 @@ public class Menu : MonoBehaviour
         Time.timeScale = 0f;
 
 
-        Piece.leftRightSensitivity = PlayerPrefs.GetInt("leftRightSensitivity", 65);
+        defaultLeftRightSensitivity = Screen.width * 0.06;
+        Math.Round(defaultLeftRightSensitivity, MidpointRounding.AwayFromZero);
+        Piece.leftRightSensitivity = PlayerPrefs.GetInt("leftRightSensitivity", (int)defaultLeftRightSensitivity);
         leftRightText.text = Piece.leftRightSensitivity.ToString();
 
-        Piece.hardDropSensitivity = PlayerPrefs.GetInt("hardDropSensitivity", 150);
+        defaultHardDropSensitivity = Screen.height * 0.06;
+        Math.Round(defaultHardDropSensitivity, MidpointRounding.AwayFromZero);
+        Piece.hardDropSensitivity = PlayerPrefs.GetInt("hardDropSensitivity", (int)defaultHardDropSensitivity);
         hardDropText.text = Piece.hardDropSensitivity.ToString();
 
         if (PlayerPrefs.GetInt("enableLeftCounterclockwise", 1) == 1)
