@@ -241,6 +241,7 @@ public class Piece : MonoBehaviour
 
     private void Lock()
     {
+        board.PlaySound();
         score.AddScore(10);
         Board.pieceSwapped = false;
         board.Set(this);

@@ -23,7 +23,12 @@ public class Board : MonoBehaviour
     public static bool pieceSwapped;
     Score score;
     Menu menu;
-    
+
+    // Sound effect
+    public AudioSource audioSource;
+    public AudioClip clip;
+    public float volume = 0.5f;
+
     public RectInt Bounds
     {
         get
@@ -185,6 +190,11 @@ public class Board : MonoBehaviour
             Vector3Int tilePosition = piece.cells[i] + piece.position;
             tilemap.SetTile(tilePosition, piece.data.tile);
         }
+    }
+
+    public void PlaySound()
+    {
+        audioSource.PlayOneShot(clip, volume);
     }
 
     public void Clear(Piece piece)
